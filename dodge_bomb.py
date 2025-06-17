@@ -30,6 +30,52 @@ def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
 
 
 
+
+
+
+    
+def gameover(screen: pg.Surface) -> None:
+    """ゲームオーバー時に，半透明の黒い画面上に「Game Over」と表示し，泣いているこうかとん画像を貼り付ける関数
+       引数 screen: pg.Surface
+       戻り値   設定した画像と文字
+    """
+    
+    fin_img = pg.Surface((WIDTH,HEIGHT)) #空のsurfceを作る(ブラックアウト)
+    pg.draw.rect(fin_img, (0,0,0),pg.Rect(0,0,1600,900)) #四角を線画がする
+    fin_img.set_alpha(200) #透明メソッドで半透明にする
+    font = pg.font.Font(None, 50) #フォントサイズを設定する
+    txt = font.render("Game Over", True, (255, 255, 255)) #ゲームオーバ-と書かれたSurfaceを生成する
+    txt_rct = txt.get_rect()
+    txt_rct.center = WIDTH/2, HEIGHT/2 #文字の座標を中央に設定する
+    ff_img = pg.image.load("fig/8.png")
+    ff1_rct = ff_img.get_rect() #画像Surfaceに対応する画像Rectを取得する
+    ff2_rct = ff_img.get_rect() #画像Surfaceに対応する画像Rectを取得する
+    ff1_rct.center = WIDTH/1.6, HEIGHT/2 #中心座標から右に移動する
+    ff2_rct.center = WIDTH/2.7, HEIGHT/2  #中心座標から左に移動する
+    screen.blit(fin_img, [0,0])
+    screen.blit(txt, txt_rct) #文字surfaceを画面surfaceに転送する
+    screen.blit(ff_img, ff1_rct) #右に貼り付ける
+    screen.blit(ff_img, ff2_rct) #左に貼り付ける
+    pg.display.update()
+    time.sleep(5)
+
+def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
+    """
+    関数:サイズの異なる爆弾Surfaceを要素としたリストと加速度リストを返す
+    戻り値：加速度のリスト，拡大のリスト
+    """
+    
+
+    bb_imgs = []
+    bb_accs = [a for a in range(1, 11)]
+
+    for r in range(1, 11):
+        bb_img = pg.Surface((20*r, 20*r))
+        pg.draw.circle(bb_img, (255, 0, 0), (10*r, 10*r), 10*r)
+        bb_imgs.append(bb_img)
+
+    return bb_imgs, bb_accs
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -46,7 +92,10 @@ def main():
     vx = +5
     vy = +5
     clock = pg.time.Clock()
+
+   
     tmr = 0
+ 
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
@@ -79,41 +128,34 @@ def main():
         if check_bound(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1]) #移動をなかったことにする
         screen.blit(kk_img, kk_rct)
-        bb_rct.move_ip(vx, vy) #爆弾の移動
+        
+
+        bb_imgs, bb_accs = init_bb_imgs()  
+        avx = vx*bb_accs[min(tmr//500, 9)]
+        bb_img = bb_imgs[min(tmr//500, 9)]
+        bb_rct.move_ip(avx, vy) #爆弾の移動
+        bb_img.set_colorkey((0,0,0)) #上書きされたので再度黒を透明色
+
         yoko, tate = check_bound(bb_rct)
         if not yoko: #横方向にはみ出ていたら
             vx *= -1
         if not tate: #縦方向にはみ出ていたら
             vy *= -1
+
+
+        
         screen.blit(bb_img, bb_rct) #爆弾の線画
+        
+
+        
+
         pg.display.update()
         tmr += 1
         clock.tick(50)
     
-
-
-    
-def gameover(screen: pg.Surface) -> None:
-    fin_img = pg.Surface((WIDTH,HEIGHT)) #空のsurfceを作る(ブラックアウト)
-    pg.draw.rect(fin_img, (0,0,0),pg.Rect(0,0,1600,900)) #四角を線画がする
-    fin_img.set_alpha(200) #透明メソッドで半透明にする
-    font = pg.font.Font(None, 50) #フォントサイズを設定する
-    txt = font.render("Game Over", True, (255, 255, 255)) #ゲームオーバ-と書かれたSurfaceを生成する
-    txt_rct = txt.get_rect()
-    txt_rct.center = WIDTH/2, HEIGHT/2 #文字の座標を中央に設定する
-    ff_img = pg.image.load("fig/8.png")
-    ff1_rct = ff_img.get_rect() #画像Surfaceに対応する画像Rectを取得する
-    ff2_rct = ff_img.get_rect() #画像Surfaceに対応する画像Rectを取得する
-    ff1_rct.center = WIDTH/1.6, HEIGHT/2 #中心座標から右に移動する
-    ff2_rct.center = WIDTH/2.7, HEIGHT/2  #中心座標から左に移動する
-    screen.blit(fin_img, [0,0])
-    screen.blit(txt, txt_rct) #文字surfaceを画面surfaceに転送する
-    screen.blit(ff_img, ff1_rct) #右に貼り付ける
-    screen.blit(ff_img, ff2_rct) #左に貼り付ける
-    pg.display.update()
-    time.sleep(5)
-
-
+        
+        
+        
 
 
 
