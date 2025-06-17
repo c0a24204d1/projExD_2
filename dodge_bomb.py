@@ -2,6 +2,7 @@ import os
 import random
 import sys
 import pygame as pg
+import time
 
 WIDTH, HEIGHT = 1100, 650
 DELTA = { #移動量辞書
@@ -44,7 +45,6 @@ def main():
     bb_rct.centery = random.randint(0, HEIGHT)#縦座標用
     vx = +5
     vy = +5
-
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -54,6 +54,7 @@ def main():
             
         if kk_rct.colliderect(bb_rct): #こうかとんRectと爆弾Rectの衝突判定
             print("ゲームオーバー")
+            gameover(screen)
             return
         
         screen.blit(bg_img, [0, 0]) 
@@ -88,6 +89,40 @@ def main():
         pg.display.update()
         tmr += 1
         clock.tick(50)
+    
+
+
+    
+def gameover(screen: pg.Surface) -> None:
+    fin_img = pg.Surface((WIDTH,HEIGHT)) #空のsurfceを作る(ブラックアウト)
+    pg.draw.rect(fin_img, (0,0,0),pg.Rect(0,0,1600,900)) #四角を線画がする
+    fin_img.set_alpha(200) #透明メソッドで半透明にする
+    font = pg.font.Font(None, 50) #フォントサイズを設定する
+    txt = font.render("Game Over", True, (255, 255, 255)) #ゲームオーバ-と書かれたSurfaceを生成する
+    txt_rct = txt.get_rect()
+    txt_rct.center = WIDTH/2, HEIGHT/2 #文字の座標を中央に設定する
+    ff_img = pg.image.load("fig/8.png")
+    ff1_rct = ff_img.get_rect() #画像Surfaceに対応する画像Rectを取得する
+    ff2_rct = ff_img.get_rect() #画像Surfaceに対応する画像Rectを取得する
+    ff1_rct.center = WIDTH/1.6, HEIGHT/2 #中心座標から右に移動する
+    ff2_rct.center = WIDTH/2.7, HEIGHT/2  #中心座標から左に移動する
+    screen.blit(fin_img, [0,0])
+    screen.blit(txt, txt_rct) #文字surfaceを画面surfaceに転送する
+    screen.blit(ff_img, ff1_rct) #右に貼り付ける
+    screen.blit(ff_img, ff2_rct) #左に貼り付ける
+    pg.display.update()
+    time.sleep(5)
+
+
+
+
+
+
+
+
+
+
+    
 
 
 if __name__ == "__main__":
